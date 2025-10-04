@@ -113,13 +113,17 @@ class ExcelImportResponse(BaseModel):
 
 # --- Helper Functions ---
 
-async def get_family_member_by_id(member_id: str):
-    member = await db.family_members.find_one({"id": member_id})
-    return FamilyMember(**member) if member else None
+async def get_investor_by_id(investor_id: str):
+    investor = await db.investors.find_one({"id": investor_id})
+    return Investor(**investor) if investor else None
 
-async def check_family_member_has_investments(member_id: str):
-    count = await db.investments.count_documents({"family_member_id": member_id})
+async def check_investor_has_investments(investor_id: str):
+    count = await db.investments.count_documents({"investor_id": investor_id})
     return count > 0
+
+async def get_custom_fields(entity_type: str):
+    fields = await db.custom_fields.find({"entity_type": entity_type}).to_list(100)
+    return [CustomFieldConfig(**field) for field in fields]
 
 # --- API Endpoints ---
 

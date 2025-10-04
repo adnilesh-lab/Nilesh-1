@@ -34,35 +34,45 @@ api_router = APIRouter(prefix="/api")
 
 # --- Data Models ---
 
-class FamilyMemberBase(BaseModel):
+class CustomField(BaseModel):
+    field_name: str
+    field_type: str  # 'text', 'number', 'date', 'email', 'phone'
+    is_required: bool = False
+
+class InvestorBase(BaseModel):
     name: str
     relationship: str
     email: Optional[str] = None
     phone: Optional[str] = None
-    date_of_birth: Optional[date] = None
-    pan_number: Optional[str] = None
+    mobile_number: Optional[str] = None
     address: Optional[str] = None
+    pan_number: Optional[str] = None
+    date_of_birth: Optional[date] = None
     occupation: Optional[str] = None
     photo_url: Optional[str] = None
+    custom_fields: dict = Field(default_factory=dict)
 
-class FamilyMemberCreate(FamilyMemberBase):
+class InvestorCreate(InvestorBase):
     pass
 
-class FamilyMember(FamilyMemberBase):
+class Investor(InvestorBase):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
 class InvestmentBase(BaseModel):
-    family_member_id: str
+    investor_id: str
     investment_name: str
     investment_type: str
     amount: float
     purchase_date: Optional[date] = None
     interest_rate: Optional[float] = None
+    interest_date: Optional[str] = None  # DDMM format
     maturity_date: Optional[date] = None
     description: Optional[str] = None
     issuer: Optional[str] = None
+    photo_url: Optional[str] = None
+    custom_fields: dict = Field(default_factory=dict)
 
 class InvestmentCreate(InvestmentBase):
     pass
@@ -71,6 +81,15 @@ class Investment(InvestmentBase):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+class CustomFieldConfig(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    entity_type: str  # 'investor' or 'investment'
+    field_name: str
+    field_type: str
+    is_required: bool = False
+    options: List[str] = Field(default_factory=list)  # For dropdown fields
+    created_at: datetime = Field(default_factory=datetime.utcnow)
 
 class DashboardStats(BaseModel):
     total_family_members: int

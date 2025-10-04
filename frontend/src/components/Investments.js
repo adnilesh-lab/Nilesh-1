@@ -12,7 +12,7 @@ import { toast } from 'sonner';
 
 export const Investments = () => {
   const [investments, setInvestments] = useState([]);
-  const [familyMembers, setFamilyMembers] = useState([]);
+  const [investors, setInvestors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedMemberFilter, setSelectedMemberFilter] = useState('');

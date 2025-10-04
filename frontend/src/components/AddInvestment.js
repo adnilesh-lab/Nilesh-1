@@ -13,6 +13,7 @@ import { toast } from 'sonner';
 export const AddInvestment = () => {
   const navigate = useNavigate();
   const [familyMembers, setFamilyMembers] = useState([]);
+  const [customFields, setCustomFields] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 

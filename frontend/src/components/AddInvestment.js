@@ -306,6 +306,131 @@ export const AddInvestment = () => {
                 />
               </div>
 
+              {/* Photo Upload Section */}
+              <div>
+                <Label htmlFor="photo_url">Investment Photo (Square format recommended)</Label>
+                <Input
+                  id="photo_url"
+                  value={formData.photo_url}
+                  onChange={(e) => handleInputChange('photo_url', e.target.value)}
+                  placeholder="Enter photo URL or upload image"
+                  data-testid="photo-url-input"
+                />
+                <p className="text-xs text-gray-600 mt-1">
+                  You can paste an image URL or upload to an image hosting service
+                </p>
+              </div>
+
+              {/* Interest Date (DDMM Format) */}
+              <div>
+                <Label htmlFor="interest_date">Interest Date (DDMM format)</Label>
+                <Input
+                  id="interest_date"
+                  value={formData.interest_date}
+                  onChange={(e) => handleInputChange('interest_date', e.target.value)}
+                  placeholder="e.g., 1503 for 15th March"
+                  maxLength={4}
+                  pattern="[0-9]{4}"
+                  data-testid="interest-date-input"
+                />
+                <p className="text-xs text-gray-600 mt-1">
+                  Enter date in DDMM format (e.g., 1503 for 15th March)
+                </p>
+              </div>
+
+              {/* Custom Fields Section */}
+              {customFields.length > 0 && (
+                <div className="space-y-4">
+                  <div className="border-t pt-6">
+                    <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                      <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                        Additional Investment Details
+                      </span>
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {customFields.map((field) => (
+                        <div key={field.id}>
+                          <Label htmlFor={field.field_name}>
+                            {field.field_name}
+                            {field.is_required && <span className="text-red-500 ml-1">*</span>}
+                          </Label>
+                          {field.field_type === 'text' && (
+                            <Input
+                              id={field.field_name}
+                              value={formData.custom_fields[field.field_name] || ''}
+                              onChange={(e) => handleInputChange('custom_fields', {
+                                ...formData.custom_fields,
+                                [field.field_name]: e.target.value
+                              })}
+                              placeholder={`Enter ${field.field_name.toLowerCase()}`}
+                              required={field.is_required}
+                            />
+                          )}
+                          {field.field_type === 'number' && (
+                            <Input
+                              id={field.field_name}
+                              type="number"
+                              value={formData.custom_fields[field.field_name] || ''}
+                              onChange={(e) => handleInputChange('custom_fields', {
+                                ...formData.custom_fields,
+                                [field.field_name]: e.target.value
+                              })}
+                              placeholder={`Enter ${field.field_name.toLowerCase()}`}
+                              required={field.is_required}
+                            />
+                          )}
+                          {field.field_type === 'date' && (
+                            <Input
+                              id={field.field_name}
+                              type="date"
+                              value={formData.custom_fields[field.field_name] || ''}
+                              onChange={(e) => handleInputChange('custom_fields', {
+                                ...formData.custom_fields,
+                                [field.field_name]: e.target.value
+                              })}
+                              required={field.is_required}
+                            />
+                          )}
+                          {field.field_type === 'email' && (
+                            <Input
+                              id={field.field_name}
+                              type="email"
+                              value={formData.custom_fields[field.field_name] || ''}
+                              onChange={(e) => handleInputChange('custom_fields', {
+                                ...formData.custom_fields,
+                                [field.field_name]: e.target.value
+                              })}
+                              placeholder={`Enter ${field.field_name.toLowerCase()}`}
+                              required={field.is_required}
+                            />
+                          )}
+                          {field.field_type === 'dropdown' && field.options && field.options.length > 0 && (
+                            <Select
+                              value={formData.custom_fields[field.field_name] || ''}
+                              onValueChange={(value) => handleInputChange('custom_fields', {
+                                ...formData.custom_fields,
+                                [field.field_name]: value
+                              })}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder={`Select ${field.field_name.toLowerCase()}`} />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {field.options.map((option) => (
+                                  <SelectItem key={option} value={option}>
+                                    {option}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Submit Button */}
               <div className="flex space-x-4">
                 <Button 

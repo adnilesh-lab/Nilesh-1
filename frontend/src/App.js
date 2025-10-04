@@ -106,6 +106,12 @@ function App() {
             </Routes>
           </Layout>
         </Suspense>
+        <Toaster 
+          position="top-right" 
+          richColors 
+          closeButton 
+          duration={5000}
+        />
       </BrowserRouter>
     </ErrorBoundary>
   );

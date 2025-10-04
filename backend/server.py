@@ -47,7 +47,7 @@ class InvestorBase(BaseModel):
     mobile_number: Optional[str] = None
     address: Optional[str] = None
     pan_number: Optional[str] = None
-    date_of_birth: Optional[date] = None
+    date_of_birth: Optional[str] = None  # Store as string instead of date
     occupation: Optional[str] = None
     photo_url: Optional[str] = None
     custom_fields: dict = Field(default_factory=dict)

@@ -1,144 +1,178 @@
-from fastapi import FastAPI, APIRouter, HTTPException
-from dotenv import load_dotenv
-from starlette.middleware.cors import CORSMiddleware
+from fastapi import FastAPI, APIRouter, HTTPException, Depends
+from fastapi.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
-import os
-import logging
-from pathlib import Path
 from pydantic import BaseModel, Field
 from typing import List, Optional
+from datetime import datetime, date
 import uuid
-from datetime import datetime
+import os
+from dotenv import load_dotenv
 
-
-ROOT_DIR = Path(__file__).parent
-load_dotenv(ROOT_DIR / '.env')
+# Load environment variables
+load_dotenv()
 
 # MongoDB connection
-mongo_url = os.environ['MONGO_URL']
-client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
+MONGO_URL = os.getenv("MONGO_URL", "mongodb://localhost:27017")
+client = AsyncIOMotorClient(MONGO_URL)
+db = client["wealth_tracker"]
 
-# Create the main app without a prefix
-app = FastAPI()
+# FastAPI app
+app = FastAPI(title="Wealth Management API", version="1.0.0")
 
-# Create a router with the /api prefix
+# CORS configuration
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# API Router
 api_router = APIRouter(prefix="/api")
 
+# --- Data Models ---
 
-# Define Models
-class Investor(BaseModel):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+class FamilyMemberBase(BaseModel):
     name: str
+    relationship: str
     email: Optional[str] = None
     phone: Optional[str] = None
+    date_of_birth: Optional[date] = None
+    pan_number: Optional[str] = None
+    address: Optional[str] = None
+    occupation: Optional[str] = None
+    photo_url: Optional[str] = None
+
+class FamilyMemberCreate(FamilyMemberBase):
+    pass
+
+class FamilyMember(FamilyMemberBase):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
-class InvestorCreate(BaseModel):
-    name: str
-    email: Optional[str] = None
-    phone: Optional[str] = None
-
-class InvestorUpdate(BaseModel):
-    name: Optional[str] = None
-    email: Optional[str] = None
-    phone: Optional[str] = None
-
-class Investment(BaseModel):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    investor_id: str
-    amount: float
+class InvestmentBase(BaseModel):
+    family_member_id: str
+    investment_name: str
     investment_type: str
+    amount: float
+    purchase_date: Optional[date] = None
+    interest_rate: Optional[float] = None
+    maturity_date: Optional[date] = None
     description: Optional[str] = None
+    issuer: Optional[str] = None
+
+class InvestmentCreate(InvestmentBase):
+    pass
+
+class Investment(InvestmentBase):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
-
-class InvestmentCreate(BaseModel):
-    investor_id: str
-    amount: float
-    investment_type: str
-    description: Optional[str] = None
 
 class DashboardStats(BaseModel):
-    total_investors: int
+    total_family_members: int
     total_investments: int
     total_portfolio_value: float
+    investment_types_count: dict
+    recent_investments: List[Investment]
 
-# Add your routes to the router instead of directly to app
+# --- Helper Functions ---
+
+async def get_family_member_by_id(member_id: str):
+    member = await db.family_members.find_one({"id": member_id})
+    return FamilyMember(**member) if member else None
+
+async def check_family_member_has_investments(member_id: str):
+    count = await db.investments.count_documents({"family_member_id": member_id})
+    return count > 0
+
+# --- API Endpoints ---
+
 @api_router.get("/")
 async def root():
-    return {"message": "Investment Tracking API"}
+    return {"message": "Wealth Management API", "version": "1.0.0"}
 
-# Investor Management Routes
-@api_router.post("/investors", response_model=Investor)
-async def create_investor(investor_data: InvestorCreate):
-    investor_dict = investor_data.dict()
-    investor = Investor(**investor_dict)
-    await db.investors.insert_one(investor.dict())
-    return investor
+# Family Member Endpoints
+@api_router.post("/family-members", response_model=FamilyMember)
+async def create_family_member(member_data: FamilyMemberCreate):
+    member = FamilyMember(**member_data.dict())
+    await db.family_members.insert_one(member.dict())
+    return member
 
-@api_router.get("/investors", response_model=List[Investor])
-async def get_investors():
-    investors = await db.investors.find().to_list(1000)
-    return [Investor(**investor) for investor in investors]
+@api_router.get("/family-members", response_model=List[FamilyMember])
+async def get_family_members():
+    members_cursor = db.family_members.find()
+    members = await members_cursor.to_list(1000)
+    return [FamilyMember(**member) for member in members]
 
-@api_router.get("/investors/{investor_id}", response_model=Investor)
-async def get_investor(investor_id: str):
-    investor = await db.investors.find_one({"id": investor_id})
-    if not investor:
-        raise HTTPException(status_code=404, detail="Investor not found")
-    return Investor(**investor)
+@api_router.get("/family-members/{member_id}", response_model=FamilyMember)
+async def get_family_member(member_id: str):
+    member = await get_family_member_by_id(member_id)
+    if not member:
+        raise HTTPException(status_code=404, detail="Family member not found")
+    return member
 
-@api_router.put("/investors/{investor_id}", response_model=Investor)
-async def update_investor(investor_id: str, investor_data: InvestorUpdate):
-    update_data = {k: v for k, v in investor_data.dict().items() if v is not None}
-    if not update_data:
-        raise HTTPException(status_code=400, detail="No data provided for update")
+@api_router.put("/family-members/{member_id}", response_model=FamilyMember)
+async def update_family_member(member_id: str, member_data: FamilyMemberCreate):
+    existing_member = await get_family_member_by_id(member_id)
+    if not existing_member:
+        raise HTTPException(status_code=404, detail="Family member not found")
     
-    update_data["updated_at"] = datetime.utcnow()
-    result = await db.investors.update_one({"id": investor_id}, {"$set": update_data})
+    updated_data = member_data.dict()
+    updated_data["updated_at"] = datetime.utcnow()
     
-    if result.matched_count == 0:
-        raise HTTPException(status_code=404, detail="Investor not found")
+    await db.family_members.update_one(
+        {"id": member_id}, 
+        {"$set": updated_data}
+    )
     
-    updated_investor = await db.investors.find_one({"id": investor_id})
-    return Investor(**updated_investor)
+    updated_member = await get_family_member_by_id(member_id)
+    return updated_member
 
-@api_router.delete("/investors/{investor_id}")
-async def delete_investor(investor_id: str):
-    # First check if investor exists
-    investor = await db.investors.find_one({"id": investor_id})
-    if not investor:
-        raise HTTPException(status_code=404, detail="Investor not found")
+@api_router.delete("/family-members/{member_id}")
+async def delete_family_member(member_id: str):
+    # Check if family member exists
+    member = await get_family_member_by_id(member_id)
+    if not member:
+        raise HTTPException(status_code=404, detail="Family member not found")
     
-    # Delete all investments for this investor first
-    await db.investments.delete_many({"investor_id": investor_id})
+    # Check if member has investments (delete protection)
+    has_investments = await check_family_member_has_investments(member_id)
+    if has_investments:
+        raise HTTPException(
+            status_code=400, 
+            detail="Cannot delete family member with existing investments. Please delete investments first."
+        )
     
-    # Then delete the investor
-    result = await db.investors.delete_one({"id": investor_id})
-    
+    # Delete family member
+    result = await db.family_members.delete_one({"id": member_id})
     if result.deleted_count == 0:
-        raise HTTPException(status_code=500, detail="Failed to delete investor")
+        raise HTTPException(status_code=500, detail="Failed to delete family member")
     
-    return {"success": True, "message": f"Investor {investor['name']} deleted successfully"}
+    return {"success": True, "message": f"Family member {member.name} deleted successfully"}
 
-# Investment Management Routes
+# Investment Endpoints
 @api_router.post("/investments", response_model=Investment)
 async def create_investment(investment_data: InvestmentCreate):
-    # Check if investor exists
-    investor = await db.investors.find_one({"id": investment_data.investor_id})
-    if not investor:
-        raise HTTPException(status_code=404, detail="Investor not found")
+    # Verify family member exists
+    member = await get_family_member_by_id(investment_data.family_member_id)
+    if not member:
+        raise HTTPException(status_code=404, detail="Family member not found")
     
-    investment_dict = investment_data.dict()
-    investment = Investment(**investment_dict)
+    investment = Investment(**investment_data.dict())
     await db.investments.insert_one(investment.dict())
     return investment
 
 @api_router.get("/investments", response_model=List[Investment])
-async def get_investments():
-    investments = await db.investments.find().to_list(1000)
+async def get_investments(family_member_id: Optional[str] = None):
+    filter_query = {}
+    if family_member_id:
+        filter_query["family_member_id"] = family_member_id
+    
+    investments_cursor = db.investments.find(filter_query)
+    investments = await investments_cursor.to_list(1000)
     return [Investment(**investment) for investment in investments]
 
 @api_router.get("/investments/{investment_id}", response_model=Investment)
@@ -148,30 +182,72 @@ async def get_investment(investment_id: str):
         raise HTTPException(status_code=404, detail="Investment not found")
     return Investment(**investment)
 
+@api_router.put("/investments/{investment_id}", response_model=Investment)
+async def update_investment(investment_id: str, investment_data: InvestmentCreate):
+    # Verify investment exists
+    existing_investment = await db.investments.find_one({"id": investment_id})
+    if not existing_investment:
+        raise HTTPException(status_code=404, detail="Investment not found")
+    
+    # Verify family member exists
+    member = await get_family_member_by_id(investment_data.family_member_id)
+    if not member:
+        raise HTTPException(status_code=404, detail="Family member not found")
+    
+    updated_data = investment_data.dict()
+    updated_data["updated_at"] = datetime.utcnow()
+    
+    await db.investments.update_one(
+        {"id": investment_id}, 
+        {"$set": updated_data}
+    )
+    
+    updated_investment = await db.investments.find_one({"id": investment_id})
+    return Investment(**updated_investment)
+
 @api_router.delete("/investments/{investment_id}")
 async def delete_investment(investment_id: str):
+    investment = await db.investments.find_one({"id": investment_id})
+    if not investment:
+        raise HTTPException(status_code=404, detail="Investment not found")
+    
     result = await db.investments.delete_one({"id": investment_id})
     if result.deleted_count == 0:
-        raise HTTPException(status_code=404, detail="Investment not found")
+        raise HTTPException(status_code=500, detail="Failed to delete investment")
+    
     return {"success": True, "message": "Investment deleted successfully"}
 
-# Dashboard Stats
+# Dashboard Stats Endpoint
 @api_router.get("/dashboard/stats", response_model=DashboardStats)
 async def get_dashboard_stats():
-    total_investors = await db.investors.count_documents({})
+    # Get total counts
+    total_family_members = await db.family_members.count_documents({})
     total_investments = await db.investments.count_documents({})
     
     # Calculate total portfolio value
+    investments_cursor = db.investments.find()
+    investments = await investments_cursor.to_list(1000)
+    total_portfolio_value = sum(inv["amount"] for inv in investments)
+    
+    # Get investment types count
     pipeline = [
-        {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
+        {"$group": {"_id": "$investment_type", "count": {"$sum": 1}}}
     ]
-    result = await db.investments.aggregate(pipeline).to_list(1)
-    total_portfolio_value = result[0]["total"] if result else 0.0
+    investment_types_cursor = db.investments.aggregate(pipeline)
+    investment_types_result = await investment_types_cursor.to_list(100)
+    investment_types_count = {item["_id"]: item["count"] for item in investment_types_result}
+    
+    # Get recent investments (last 5)
+    recent_investments_cursor = db.investments.find().sort("created_at", -1).limit(5)
+    recent_investments_data = await recent_investments_cursor.to_list(5)
+    recent_investments = [Investment(**inv) for inv in recent_investments_data]
     
     return DashboardStats(
-        total_investors=total_investors,
+        total_family_members=total_family_members,
         total_investments=total_investments,
-        total_portfolio_value=total_portfolio_value
+        total_portfolio_value=total_portfolio_value,
+        investment_types_count=investment_types_count,
+        recent_investments=recent_investments
     )
 
 # Include the router in the main app

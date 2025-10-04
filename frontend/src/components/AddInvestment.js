@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { ArrowLeft, DollarSign, Save } from 'lucide-react';
-import { investmentsAPI, familyMembersAPI } from '@/lib/api';
+import { investmentsAPI, investorsAPI } from '@/lib/api';
 import { toast } from 'sonner';
 
 export const AddInvestment = () => {

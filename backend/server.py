@@ -294,7 +294,7 @@ async def import_investments_from_excel(file_data: dict):
 @api_router.get("/dashboard/stats", response_model=DashboardStats)
 async def get_dashboard_stats():
     # Get total counts
-    total_family_members = await db.family_members.count_documents({})
+    total_investors = await db.investors.count_documents({})
     total_investments = await db.investments.count_documents({})
     
     # Calculate total portfolio value
@@ -304,23 +304,103 @@ async def get_dashboard_stats():
     
     # Get investment types count
     pipeline = [
-        {"$group": {"_id": "$investment_type", "count": {"$sum": 1}}}
+        {"$group": {"_id": "$investment_type", "count": {"$sum": 1}, "total_amount": {"$sum": "$amount"}}}
     ]
     investment_types_cursor = db.investments.aggregate(pipeline)
     investment_types_result = await investment_types_cursor.to_list(100)
-    investment_types_count = {item["_id"]: item["count"] for item in investment_types_result}
+    investment_types_count = {
+        item["_id"]: {
+            "count": item["count"],
+            "total_amount": item["total_amount"]
+        } for item in investment_types_result
+    }
     
     # Get recent investments (last 5)
     recent_investments_cursor = db.investments.find().sort("created_at", -1).limit(5)
     recent_investments_data = await recent_investments_cursor.to_list(5)
     recent_investments = [Investment(**inv) for inv in recent_investments_data]
     
+    # Get top investors by investment value
+    top_investors_pipeline = [
+        {"$group": {"_id": "$investor_id", "total_amount": {"$sum": "$amount"}, "count": {"$sum": 1}}},
+        {"$sort": {"total_amount": -1}},
+        {"$limit": 5}
+    ]
+    top_investors_cursor = db.investments.aggregate(top_investors_pipeline)
+    top_investors_data = await top_investors_cursor.to_list(5)
+    
+    # Get investor details for top investors
+    top_investors = []
+    for investor_data in top_investors_data:
+        investor = await get_investor_by_id(investor_data["_id"])
+        if investor:
+            top_investors.append({
+                "name": investor.name,
+                "total_amount": investor_data["total_amount"],
+                "investment_count": investor_data["count"]
+            })
+    
     return DashboardStats(
-        total_family_members=total_family_members,
+        total_investors=total_investors,
         total_investments=total_investments,
         total_portfolio_value=total_portfolio_value,
         investment_types_count=investment_types_count,
-        recent_investments=recent_investments
+        recent_investments=recent_investments,
+        top_investors=top_investors
+    )
+
+# Reports Endpoints
+@api_router.get("/reports/summary", response_model=ReportData)
+async def get_reports_summary():
+    # Investor-wise summary
+    investor_summary_pipeline = [
+        {"$group": {
+            "_id": "$investor_id", 
+            "total_amount": {"$sum": "$amount"}, 
+            "investment_count": {"$sum": 1}
+        }}
+    ]
+    investor_summary_cursor = db.investments.aggregate(investor_summary_pipeline)
+    investor_summary_data = await investor_summary_cursor.to_list(100)
+    
+    investor_wise_summary = []
+    for data in investor_summary_data:
+        investor = await get_investor_by_id(data["_id"])
+        if investor:
+            investor_wise_summary.append({
+                "investor_name": investor.name,
+                "total_amount": data["total_amount"],
+                "investment_count": data["investment_count"]
+            })
+    
+    # Investment type summary
+    type_summary_pipeline = [
+        {"$group": {
+            "_id": "$investment_type",
+            "total_amount": {"$sum": "$amount"},
+            "count": {"$sum": 1},
+            "avg_amount": {"$avg": "$amount"}
+        }}
+    ]
+    type_summary_cursor = db.investments.aggregate(type_summary_pipeline)
+    investment_type_summary = await type_summary_cursor.to_list(100)
+    
+    # Monthly summary (placeholder - would need proper date grouping)
+    monthly_summary = []
+    
+    # Total summary
+    total_summary = {
+        "total_investors": len(investor_wise_summary),
+        "total_investments": sum(item["investment_count"] for item in investor_wise_summary),
+        "total_portfolio_value": sum(item["total_amount"] for item in investor_wise_summary),
+        "average_investment_per_investor": sum(item["total_amount"] for item in investor_wise_summary) / len(investor_wise_summary) if investor_wise_summary else 0
+    }
+    
+    return ReportData(
+        investor_wise_summary=investor_wise_summary,
+        investment_type_summary=investment_type_summary,
+        monthly_summary=monthly_summary,
+        total_summary=total_summary
     )
 
 # Include the router in the main app

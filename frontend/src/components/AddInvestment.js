@@ -53,7 +53,7 @@ export const AddInvestment = () => {
   const fetchFamilyMembers = async () => {
     try {
       setLoading(true);
-      const data = await familyMembersAPI.getAll();
+      const data = await investorsAPI.getAll();
       setFamilyMembers(data);
     } catch (error) {
       console.error('Error fetching family members:', error);

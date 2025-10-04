@@ -134,10 +134,10 @@ export const Investments = () => {
                   <SelectValue placeholder="Filter by member" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Members</SelectItem>
-                  {familyMembers.map((member) => (
-                    <SelectItem key={member.id} value={member.id}>
-                      {member.name}
+                  <SelectItem value="">All Investors</SelectItem>
+                  {investors.map((investor) => (
+                    <SelectItem key={investor.id} value={investor.id}>
+                      {investor.name}
                     </SelectItem>
                   ))}
                 </SelectContent>

@@ -14,20 +14,25 @@ import '@/App.css';
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-// API functions with proper error handling
+// API functions with proper error handling for family members
 const api = {
-  getInvestors: async () => {
-    const response = await axios.get(`${API}/investors`);
+  getFamilyMembers: async () => {
+    const response = await axios.get(`${API}/family-members`);
     return response.data;
   },
   
-  createInvestor: async (investorData) => {
-    const response = await axios.post(`${API}/investors`, investorData);
+  createFamilyMember: async (memberData) => {
+    const response = await axios.post(`${API}/family-members`, memberData);
     return response.data;
   },
   
-  deleteInvestor: async (investorId) => {
-    const response = await axios.delete(`${API}/investors/${investorId}`);
+  deleteFamilyMember: async (memberId) => {
+    const response = await axios.delete(`${API}/family-members/${memberId}`);
+    return response.data;
+  },
+  
+  updateFamilyMember: async (memberId, memberData) => {
+    const response = await axios.put(`${API}/family-members/${memberId}`, memberData);
     return response.data;
   },
   
@@ -37,8 +42,19 @@ const api = {
   },
   
   getDashboardStats: async () => {
-    const response = await axios.get(`${API}/dashboard/stats`);
-    return response.data;
+    // Calculate stats from family members and investments
+    const [members, investments] = await Promise.all([
+      api.getFamilyMembers(),
+      api.getInvestments()
+    ]);
+    
+    const totalPortfolioValue = investments.reduce((sum, inv) => sum + (parseFloat(inv.amount) || 0), 0);
+    
+    return {
+      total_investors: members.length,
+      total_investments: investments.length,
+      total_portfolio_value: totalPortfolioValue
+    };
   }
 };
 

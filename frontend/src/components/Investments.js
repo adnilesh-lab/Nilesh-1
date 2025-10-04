@@ -71,7 +71,7 @@ export const Investments = () => {
       investment.investment_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       investment.investment_type.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (investment.issuer && investment.issuer.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      getMemberName(investment.family_member_id).toLowerCase().includes(searchTerm.toLowerCase());
+      getInvestorName(investment.investor_id).toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesMember = !selectedMemberFilter || investment.family_member_id === selectedMemberFilter;
     const matchesType = !selectedTypeFilter || investment.investment_type === selectedTypeFilter;

@@ -6,6 +6,12 @@ const config = {
   disableHotReload: process.env.DISABLE_HOT_RELOAD === 'true',
 };
 
+const path = require('path');
+
 module.exports = {
-  // Simple configuration - remove complex webpack modifications
+  webpack: {
+    alias: {
+      '@': path.resolve(__dirname, 'src'),
+    },
+  },
 };

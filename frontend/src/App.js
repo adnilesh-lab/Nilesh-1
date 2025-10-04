@@ -79,13 +79,13 @@ const Dashboard = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [investorsData, investmentsData, statsData] = await Promise.all([
-        api.getInvestors(),
+      const [membersData, investmentsData, statsData] = await Promise.all([
+        api.getFamilyMembers(),
         api.getInvestments(), 
         api.getDashboardStats()
       ]);
       
-      setInvestors(investorsData);
+      setFamilyMembers(membersData);
       setInvestments(investmentsData);
       setStats(statsData);
     } catch (error) {

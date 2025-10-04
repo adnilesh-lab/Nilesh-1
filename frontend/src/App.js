@@ -100,43 +100,56 @@ const Dashboard = () => {
     fetchData();
   }, []);
 
-  const handleAddInvestor = async () => {
-    if (!newInvestor.name.trim()) {
-      toast.error('Investor name is required');
+  const handleAddFamilyMember = async () => {
+    if (!newMember.name.trim()) {
+      toast.error('Family member name is required');
       return;
     }
 
     try {
-      const createdInvestor = await api.createInvestor(newInvestor);
+      const createdMember = await api.createFamilyMember(newMember);
       
       // Update local state immediately to prevent caching issues
-      setInvestors(prev => [...prev, createdInvestor]);
+      setFamilyMembers(prev => [...prev, createdMember]);
       setStats(prev => ({ ...prev, total_investors: prev.total_investors + 1 }));
       
-      setNewInvestor({ name: '', email: '', phone: '' });
+      setNewMember({ 
+        name: '', 
+        relationship: 'Self', 
+        email: '', 
+        phone_number: '',
+        birth_date: '',
+        pan_number: '',
+        address: '',
+        occupation: ''
+      });
       setIsAddDialogOpen(false);
-      toast.success(`Investor ${createdInvestor.name} added successfully`);
+      toast.success(`Family member ${createdMember.name} added successfully`);
     } catch (error) {
-      console.error('Error adding investor:', error);
-      toast.error('Failed to add investor');
+      console.error('Error adding family member:', error);
+      toast.error('Failed to add family member');
     }
   };
 
-  const handleDeleteInvestor = async (investorId, investorName) => {
+  const handleDeleteFamilyMember = async (memberId, memberName) => {
     try {
-      await api.deleteInvestor(investorId);
+      await api.deleteFamilyMember(memberId);
       
-      // Immediately update local state to prevent caching issues
-      setInvestors(prev => prev.filter(investor => investor.id !== investorId));
+      // KEY FIX: Immediately update local state to prevent caching issues
+      // This ensures the member is removed from the UI immediately and won't reappear on refresh
+      setFamilyMembers(prev => prev.filter(member => member.id !== memberId));
       setStats(prev => ({ ...prev, total_investors: prev.total_investors - 1 }));
       
-      // Also remove any investments for this investor
-      setInvestments(prev => prev.filter(investment => investment.investor_id !== investorId));
+      // Also remove any investments for this family member
+      setInvestments(prev => prev.filter(investment => investment.family_member_id !== memberId));
       
-      toast.success(`Investor ${investorName} deleted successfully`);
+      toast.success(`Family member ${memberName} deleted successfully`);
     } catch (error) {
-      console.error('Error deleting investor:', error);
-      toast.error('Failed to delete investor');
+      console.error('Error deleting family member:', error);
+      toast.error('Failed to delete family member');
+      
+      // Re-fetch data if delete failed to ensure UI is in sync
+      fetchData();
     }
   };
 

@@ -334,67 +334,108 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        {/* Investors List */}
+        {/* Family Members List */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Investors ({investors.length})</CardTitle>
-            <Button 
-              onClick={() => setIsAddDialogOpen(true)}
-              size="sm"
-              data-testid="add-investor-header-button"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Add Investor
-            </Button>
+            <CardTitle>Family Members ({filteredMembers.length})</CardTitle>
+            <div className="flex items-center space-x-2">
+              <div className="relative">
+                <Search className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <Input
+                  placeholder="Search members..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 pr-4 py-2 w-64"
+                />
+              </div>
+              <Button 
+                onClick={() => setIsAddDialogOpen(true)}
+                size="sm"
+                data-testid="add-member-header-button"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add Member
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
-            {investors.length === 0 ? (
+            {filteredMembers.length === 0 ? (
               <div className="text-center py-8">
                 <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No Investors Yet</h3>
-                <p className="text-gray-500 mb-4">Start by adding your first investor.</p>
-                <Button onClick={() => setIsAddDialogOpen(true)} data-testid="add-first-investor-button">
-                  Add Your First Investor
-                </Button>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  {searchTerm ? 'No matching members found' : 'No Family Members Yet'}
+                </h3>
+                <p className="text-gray-500 mb-4">
+                  {searchTerm ? 'Try adjusting your search term' : 'Start by adding your first family member.'}
+                </p>
+                {!searchTerm && (
+                  <Button onClick={() => setIsAddDialogOpen(true)} data-testid="add-first-member-button">
+                    Add Your First Family Member
+                  </Button>
+                )}
               </div>
             ) : (
               <div className="space-y-4">
-                {investors.map((investor) => (
-                  <div key={investor.id} className="flex items-center justify-between p-4 border rounded-lg" data-testid={`investor-${investor.id}`}>
-                    <div>
-                      <h4 className="font-medium text-gray-900" data-testid={`investor-name-${investor.id}`}>{investor.name}</h4>
-                      {investor.email && (
-                        <p className="text-sm text-gray-600" data-testid={`investor-email-${investor.id}`}>{investor.email}</p>
+                {filteredMembers.map((member) => (
+                  <div key={member.id} className="flex items-start justify-between p-4 border rounded-lg" data-testid={`member-${member.id}`}>
+                    <div className="flex items-start space-x-4">
+                      {member.photo_url && (
+                        <img 
+                          src={member.photo_url} 
+                          alt={member.name}
+                          className="w-16 h-16 rounded-full object-cover"
+                        />
                       )}
-                      {investor.phone && (
-                        <p className="text-sm text-gray-600" data-testid={`investor-phone-${investor.id}`}>{investor.phone}</p>
-                      )}
+                      <div>
+                        <h4 className="font-medium text-gray-900" data-testid={`member-name-${member.id}`}>{member.name}</h4>
+                        <p className="text-sm text-blue-600 font-medium">{member.relationship}</p>
+                        {member.age && (
+                          <p className="text-sm text-gray-600">Age: {member.age}</p>
+                        )}
+                        {member.email && (
+                          <p className="text-sm text-gray-600" data-testid={`member-email-${member.id}`}>{member.email}</p>
+                        )}
+                        {member.phone_number && (
+                          <p className="text-sm text-gray-600" data-testid={`member-phone-${member.id}`}>{member.phone_number}</p>
+                        )}
+                        {member.occupation && (
+                          <p className="text-sm text-gray-600">{member.occupation}</p>
+                        )}
+                        {member.pan_number && (
+                          <p className="text-sm text-gray-600">PAN: {member.pan_number}</p>
+                        )}
+                      </div>
                     </div>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button variant="destructive" size="sm" data-testid={`delete-investor-${investor.id}`}>
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Delete Investor</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Are you sure you want to delete {investor.name}? This action cannot be undone and will also delete all associated investments.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel data-testid={`cancel-delete-${investor.id}`}>Cancel</AlertDialogCancel>
-                          <AlertDialogAction 
-                            onClick={() => handleDeleteInvestor(investor.id, investor.name)}
-                            className="bg-red-600 hover:bg-red-700"
-                            data-testid={`confirm-delete-${investor.id}`}
-                          >
-                            Delete
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
+                    <div className="flex items-center space-x-2">
+                      <Button variant="outline" size="sm">
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="destructive" size="sm" data-testid={`delete-member-${member.id}`}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete Family Member</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Are you sure you want to delete {member.name}? This action cannot be undone and will also delete all associated investments.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel data-testid={`cancel-delete-${member.id}`}>Cancel</AlertDialogCancel>
+                            <AlertDialogAction 
+                              onClick={() => handleDeleteFamilyMember(member.id, member.name)}
+                              className="bg-red-600 hover:bg-red-700"
+                              data-testid={`confirm-delete-${member.id}`}
+                            >
+                              Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
                   </div>
                 ))}
               </div>

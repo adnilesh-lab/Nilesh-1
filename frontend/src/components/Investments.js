@@ -266,7 +266,7 @@ export const Investments = () => {
                           <div>
                             <span className="text-gray-600">Owner:</span>
                             <div className="font-medium">
-                              {getMemberName(investment.family_member_id)}
+                              {getInvestorName(investment.investor_id)}
                             </div>
                           </div>
                           

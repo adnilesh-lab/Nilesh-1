@@ -163,13 +163,13 @@ export const AddInvestment = () => {
               {/* Basic Information */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <Label htmlFor="family_member_id">Family Member *</Label>
+                  <Label htmlFor="investor_id">Investor *</Label>
                   <Select 
-                    value={formData.family_member_id} 
-                    onValueChange={(value) => handleInputChange('family_member_id', value)}
+                    value={formData.investor_id} 
+                    onValueChange={(value) => handleInputChange('investor_id', value)}
                   >
-                    <SelectTrigger data-testid="member-select">
-                      <SelectValue placeholder="Select family member" />
+                    <SelectTrigger data-testid="investor-select">
+                      <SelectValue placeholder="Select investor" />
                     </SelectTrigger>
                     <SelectContent>
                       {familyMembers.map((member) => (

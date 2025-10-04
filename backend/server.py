@@ -129,66 +129,84 @@ async def get_custom_fields(entity_type: str):
 
 @api_router.get("/")
 async def root():
-    return {"message": "Wealth Management API", "version": "1.0.0"}
+    return {"message": "Adv Nilesh Vishwanath Agarwal Investment Portfolio API", "version": "2.0.0"}
 
-# Family Member Endpoints
-@api_router.post("/family-members", response_model=FamilyMember)
-async def create_family_member(member_data: FamilyMemberCreate):
-    member = FamilyMember(**member_data.dict())
-    await db.family_members.insert_one(member.dict())
-    return member
+# Investor Management Endpoints
+@api_router.post("/investors", response_model=Investor)
+async def create_investor(investor_data: InvestorCreate):
+    investor = Investor(**investor_data.dict())
+    await db.investors.insert_one(investor.dict())
+    return investor
 
-@api_router.get("/family-members", response_model=List[FamilyMember])
-async def get_family_members():
-    members_cursor = db.family_members.find()
-    members = await members_cursor.to_list(1000)
-    return [FamilyMember(**member) for member in members]
+@api_router.get("/investors", response_model=List[Investor])
+async def get_investors():
+    investors_cursor = db.investors.find()
+    investors = await investors_cursor.to_list(1000)
+    return [Investor(**investor) for investor in investors]
 
-@api_router.get("/family-members/{member_id}", response_model=FamilyMember)
-async def get_family_member(member_id: str):
-    member = await get_family_member_by_id(member_id)
-    if not member:
-        raise HTTPException(status_code=404, detail="Family member not found")
-    return member
+@api_router.get("/investors/{investor_id}", response_model=Investor)
+async def get_investor(investor_id: str):
+    investor = await get_investor_by_id(investor_id)
+    if not investor:
+        raise HTTPException(status_code=404, detail="Investor not found")
+    return investor
 
-@api_router.put("/family-members/{member_id}", response_model=FamilyMember)
-async def update_family_member(member_id: str, member_data: FamilyMemberCreate):
-    existing_member = await get_family_member_by_id(member_id)
-    if not existing_member:
-        raise HTTPException(status_code=404, detail="Family member not found")
+@api_router.put("/investors/{investor_id}", response_model=Investor)
+async def update_investor(investor_id: str, investor_data: InvestorCreate):
+    existing_investor = await get_investor_by_id(investor_id)
+    if not existing_investor:
+        raise HTTPException(status_code=404, detail="Investor not found")
     
-    updated_data = member_data.dict()
+    updated_data = investor_data.dict()
     updated_data["updated_at"] = datetime.utcnow()
     
-    await db.family_members.update_one(
-        {"id": member_id}, 
+    await db.investors.update_one(
+        {"id": investor_id}, 
         {"$set": updated_data}
     )
     
-    updated_member = await get_family_member_by_id(member_id)
-    return updated_member
+    updated_investor = await get_investor_by_id(investor_id)
+    return updated_investor
 
-@api_router.delete("/family-members/{member_id}")
-async def delete_family_member(member_id: str):
-    # Check if family member exists
-    member = await get_family_member_by_id(member_id)
-    if not member:
-        raise HTTPException(status_code=404, detail="Family member not found")
+@api_router.delete("/investors/{investor_id}")
+async def delete_investor(investor_id: str):
+    # Check if investor exists
+    investor = await get_investor_by_id(investor_id)
+    if not investor:
+        raise HTTPException(status_code=404, detail="Investor not found")
     
-    # Check if member has investments (delete protection)
-    has_investments = await check_family_member_has_investments(member_id)
+    # Check if investor has investments (delete protection)
+    has_investments = await check_investor_has_investments(investor_id)
     if has_investments:
         raise HTTPException(
             status_code=400, 
-            detail="Cannot delete family member with existing investments. Please delete investments first."
+            detail="Cannot delete investor with existing investments. Please delete investments first."
         )
     
-    # Delete family member
-    result = await db.family_members.delete_one({"id": member_id})
+    # Delete investor
+    result = await db.investors.delete_one({"id": investor_id})
     if result.deleted_count == 0:
-        raise HTTPException(status_code=500, detail="Failed to delete family member")
+        raise HTTPException(status_code=500, detail="Failed to delete investor")
     
-    return {"success": True, "message": f"Family member {member.name} deleted successfully"}
+    return {"success": True, "message": f"Investor {investor.name} deleted successfully"}
+
+# Custom Fields Management
+@api_router.post("/custom-fields", response_model=CustomFieldConfig)
+async def create_custom_field(field_data: dict):
+    field_config = CustomFieldConfig(**field_data)
+    await db.custom_fields.insert_one(field_config.dict())
+    return field_config
+
+@api_router.get("/custom-fields/{entity_type}", response_model=List[CustomFieldConfig])
+async def get_custom_fields_for_entity(entity_type: str):
+    return await get_custom_fields(entity_type)
+
+@api_router.delete("/custom-fields/{field_id}")
+async def delete_custom_field(field_id: str):
+    result = await db.custom_fields.delete_one({"id": field_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Custom field not found")
+    return {"success": True, "message": "Custom field deleted successfully"}
 
 # Investment Endpoints
 @api_router.post("/investments", response_model=Investment)

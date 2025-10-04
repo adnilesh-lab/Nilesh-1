@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Trash2, Plus, Users, TrendingUp, DollarSign } from 'lucide-react';
+import { Trash2, Plus, Users, TrendingUp, DollarSign, Edit, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import '@/App.css';
 

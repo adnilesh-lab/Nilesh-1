@@ -92,11 +92,24 @@ class CustomFieldConfig(BaseModel):
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
 class DashboardStats(BaseModel):
-    total_family_members: int
+    total_investors: int
     total_investments: int
     total_portfolio_value: float
     investment_types_count: dict
     recent_investments: List[Investment]
+    top_investors: List[dict]
+
+class ReportData(BaseModel):
+    investor_wise_summary: List[dict]
+    investment_type_summary: List[dict]
+    monthly_summary: List[dict]
+    total_summary: dict
+
+class ExcelImportResponse(BaseModel):
+    success: bool
+    imported_count: int
+    failed_count: int
+    errors: List[str]
 
 # --- Helper Functions ---
 

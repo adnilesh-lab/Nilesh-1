@@ -2,17 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Users, TrendingUp, DollarSign, Plus, ArrowRight } from 'lucide-react';
+import { Users, TrendingUp, DollarSign, Plus, ArrowRight, BarChart3, PieChart, Target } from 'lucide-react';
 import { dashboardAPI } from '@/lib/api';
 import { toast } from 'sonner';
 
 export const Dashboard = () => {
   const [stats, setStats] = useState({
-    total_family_members: 0,
+    total_investors: 0,
     total_investments: 0,
     total_portfolio_value: 0,
     investment_types_count: {},
-    recent_investments: []
+    recent_investments: [],
+    top_investors: []
   });
   const [loading, setLoading] = useState(true);
 

@@ -20,38 +20,42 @@ api.interceptors.response.use(
   }
 );
 
-// Family Members API
-export const familyMembersAPI = {
+// Investors API (Enhanced)
+export const investorsAPI = {
   getAll: async () => {
-    const response = await api.get('/family-members');
+    const response = await api.get('/investors');
     return response.data;
   },
 
   getById: async (id) => {
-    const response = await api.get(`/family-members/${id}`);
+    const response = await api.get(`/investors/${id}`);
     return response.data;
   },
 
-  create: async (memberData) => {
-    const response = await api.post('/family-members', memberData);
+  create: async (investorData) => {
+    const response = await api.post('/investors', investorData);
     return response.data;
   },
 
-  update: async (id, memberData) => {
-    const response = await api.put(`/family-members/${id}`, memberData);
+  update: async (id, investorData) => {
+    const response = await api.put(`/investors/${id}`, investorData);
     return response.data;
   },
 
   delete: async (id) => {
-    const response = await api.delete(`/family-members/${id}`);
+    const response = await api.delete(`/investors/${id}`);
     return response.data;
   },
 };
 
-// Investments API
+// Investments API (Enhanced)
 export const investmentsAPI = {
-  getAll: async (familyMemberId = null) => {
-    const params = familyMemberId ? { family_member_id: familyMemberId } : {};
+  getAll: async (investorId = null, investmentType = null, viewType = 'list') => {
+    const params = {};
+    if (investorId) params.investor_id = investorId;
+    if (investmentType) params.investment_type = investmentType;
+    if (viewType) params.view_type = viewType;
+    
     const response = await api.get('/investments', { params });
     return response.data;
   },
@@ -75,12 +79,43 @@ export const investmentsAPI = {
     const response = await api.delete(`/investments/${id}`);
     return response.data;
   },
+
+  importFromExcel: async (fileData) => {
+    const response = await api.post('/investments/import-excel', fileData);
+    return response.data;
+  },
 };
 
-// Dashboard API
+// Custom Fields API
+export const customFieldsAPI = {
+  getByEntityType: async (entityType) => {
+    const response = await api.get(`/custom-fields/${entityType}`);
+    return response.data;
+  },
+
+  create: async (fieldData) => {
+    const response = await api.post('/custom-fields', fieldData);
+    return response.data;
+  },
+
+  delete: async (fieldId) => {
+    const response = await api.delete(`/custom-fields/${fieldId}`);
+    return response.data;
+  },
+};
+
+// Dashboard API (Enhanced)
 export const dashboardAPI = {
   getStats: async () => {
     const response = await api.get('/dashboard/stats');
+    return response.data;
+  },
+};
+
+// Reports API
+export const reportsAPI = {
+  getSummary: async () => {
+    const response = await api.get('/reports/summary');
     return response.data;
   },
 };

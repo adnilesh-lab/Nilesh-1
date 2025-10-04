@@ -37,22 +37,33 @@ export const Dashboard = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="loading-spinner rounded-full h-16 w-16 border-4 border-indigo-200 border-t-indigo-600"></div>
       </div>
     );
   }
 
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
+
   return (
-    <div className="space-y-8">
-      {/* Header */}
+    <div className="space-y-8 fade-in">
+      {/* Professional Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-600 mt-2">Welcome to your wealth management overview</p>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+            Investment Portfolio Dashboard
+          </h1>
+          <p className="text-gray-600 mt-2 text-lg">Professional wealth management overview</p>
         </div>
-        <Button asChild>
+        <Button asChild className="gradient-primary text-white shadow-lg hover:shadow-xl transition-all duration-300">
           <Link to="/add-investment">
-            <Plus className="h-4 w-4 mr-2" />
+            <Plus className="h-5 w-5 mr-2" />
             Add Investment
           </Link>
         </Button>

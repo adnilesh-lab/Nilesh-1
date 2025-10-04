@@ -65,10 +65,10 @@ class InvestmentBase(BaseModel):
     investment_name: str
     investment_type: str
     amount: float
-    purchase_date: Optional[date] = None
+    purchase_date: Optional[str] = None  # Store as string instead of date
     interest_rate: Optional[float] = None
     interest_date: Optional[str] = None  # DDMM format
-    maturity_date: Optional[date] = None
+    maturity_date: Optional[str] = None  # Store as string instead of date
     description: Optional[str] = None
     issuer: Optional[str] = None
     photo_url: Optional[str] = None

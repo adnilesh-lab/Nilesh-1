@@ -67,8 +67,8 @@ export const AddInvestment = () => {
     e.preventDefault();
     
     // Validation
-    if (!formData.family_member_id) {
-      toast.error('Please select a family member');
+    if (!formData.investor_id) {
+      toast.error('Please select an investor');
       return;
     }
     

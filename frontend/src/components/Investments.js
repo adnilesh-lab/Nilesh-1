@@ -59,9 +59,9 @@ export const Investments = () => {
     }
   };
 
-  const getMemberName = (memberId) => {
-    const member = familyMembers.find(m => m.id === memberId);
-    return member ? member.name : 'Unknown Member';
+  const getInvestorName = (investorId) => {
+    const investor = investors.find(inv => inv.id === investorId);
+    return investor ? investor.name : 'Unknown Investor';
   };
 
   const investmentTypes = [...new Set(investments.map(inv => inv.investment_type))].sort();

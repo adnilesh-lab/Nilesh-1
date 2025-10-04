@@ -100,6 +100,14 @@ const Dashboard = () => {
     fetchData();
   }, []);
 
+  // Filter family members based on search term
+  const filteredMembers = familyMembers.filter(member => 
+    member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    member.relationship.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (member.email && member.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (member.occupation && member.occupation.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
+
   const handleAddFamilyMember = async () => {
     if (!newMember.name.trim()) {
       toast.error('Family member name is required');

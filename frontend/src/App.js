@@ -233,24 +233,49 @@ const Dashboard = () => {
                   <Button variant="outline" className="h-auto p-4">
                     <div className="flex flex-col items-center">
                       <Users className="h-6 w-6 mb-2" />
-                      <span className="font-medium">Manage Investors</span>
-                      <span className="text-sm text-muted-foreground">Add investors</span>
+                      <span className="font-medium">Manage Family</span>
+                      <span className="text-sm text-muted-foreground">Add family members</span>
                     </div>
                   </Button>
                 </DialogTrigger>
-                <DialogContent>
+                <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
                   <DialogHeader>
-                    <DialogTitle>Add New Investor</DialogTitle>
+                    <DialogTitle>Add New Family Member</DialogTitle>
                   </DialogHeader>
                   <div className="space-y-4">
                     <div>
                       <Label htmlFor="name">Name *</Label>
                       <Input
                         id="name"
-                        value={newInvestor.name}
-                        onChange={(e) => setNewInvestor(prev => ({ ...prev, name: e.target.value }))}
-                        placeholder="Enter investor name"
-                        data-testid="investor-name-input"
+                        value={newMember.name}
+                        onChange={(e) => setNewMember(prev => ({ ...prev, name: e.target.value }))}
+                        placeholder="Enter full name"
+                        data-testid="member-name-input"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="relationship">Relationship</Label>
+                      <select 
+                        id="relationship"
+                        value={newMember.relationship}
+                        onChange={(e) => setNewMember(prev => ({ ...prev, relationship: e.target.value }))}
+                        className="w-full p-2 border rounded-md"
+                      >
+                        <option value="Self">Self</option>
+                        <option value="Spouse">Spouse</option>
+                        <option value="Child">Child</option>
+                        <option value="Parent">Parent</option>
+                        <option value="Sibling">Sibling</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
+                    <div>
+                      <Label htmlFor="birth_date">Birth Date</Label>
+                      <Input
+                        id="birth_date"
+                        type="date"
+                        value={newMember.birth_date}
+                        onChange={(e) => setNewMember(prev => ({ ...prev, birth_date: e.target.value }))}
                       />
                     </div>
                     <div>
@@ -258,24 +283,49 @@ const Dashboard = () => {
                       <Input
                         id="email"
                         type="email"
-                        value={newInvestor.email}
-                        onChange={(e) => setNewInvestor(prev => ({ ...prev, email: e.target.value }))}
+                        value={newMember.email}
+                        onChange={(e) => setNewMember(prev => ({ ...prev, email: e.target.value }))}
                         placeholder="Enter email address"
-                        data-testid="investor-email-input"
                       />
                     </div>
                     <div>
-                      <Label htmlFor="phone">Phone</Label>
+                      <Label htmlFor="phone_number">Phone</Label>
                       <Input
-                        id="phone"
-                        value={newInvestor.phone}
-                        onChange={(e) => setNewInvestor(prev => ({ ...prev, phone: e.target.value }))}
+                        id="phone_number"
+                        value={newMember.phone_number}
+                        onChange={(e) => setNewMember(prev => ({ ...prev, phone_number: e.target.value }))}
                         placeholder="Enter phone number"
-                        data-testid="investor-phone-input"
                       />
                     </div>
-                    <Button onClick={handleAddInvestor} className="w-full" data-testid="add-investor-button">
-                      Add Investor
+                    <div>
+                      <Label htmlFor="pan_number">PAN Number</Label>
+                      <Input
+                        id="pan_number"
+                        value={newMember.pan_number}
+                        onChange={(e) => setNewMember(prev => ({ ...prev, pan_number: e.target.value }))}
+                        placeholder="Enter PAN number"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="occupation">Occupation</Label>
+                      <Input
+                        id="occupation"
+                        value={newMember.occupation}
+                        onChange={(e) => setNewMember(prev => ({ ...prev, occupation: e.target.value }))}
+                        placeholder="Enter occupation"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="address">Address</Label>
+                      <Input
+                        id="address"
+                        value={newMember.address}
+                        onChange={(e) => setNewMember(prev => ({ ...prev, address: e.target.value }))}
+                        placeholder="Enter address"
+                      />
+                    </div>
+                    <Button onClick={handleAddFamilyMember} className="w-full" data-testid="add-member-button">
+                      Add Family Member
                     </Button>
                   </div>
                 </DialogContent>

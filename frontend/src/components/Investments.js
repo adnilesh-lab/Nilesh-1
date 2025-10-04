@@ -21,12 +21,12 @@ export const Investments = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [investmentsData, membersData] = await Promise.all([
+      const [investmentsData, investorsData] = await Promise.all([
         investmentsAPI.getAll(),
-        familyMembersAPI.getAll()
+        investorsAPI.getAll()
       ]);
       setInvestments(investmentsData);
-      setFamilyMembers(membersData);
+      setInvestors(investorsData);
     } catch (error) {
       console.error('Error fetching data:', error);
       toast.error('Failed to load investments');

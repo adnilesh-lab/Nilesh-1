@@ -59,11 +59,21 @@ const api = {
 };
 
 const Dashboard = () => {
-  const [investors, setInvestors] = useState([]);
+  const [familyMembers, setFamilyMembers] = useState([]);
   const [investments, setInvestments] = useState([]);
   const [stats, setStats] = useState({ total_investors: 0, total_investments: 0, total_portfolio_value: 0 });
   const [loading, setLoading] = useState(true);
-  const [newInvestor, setNewInvestor] = useState({ name: '', email: '', phone: '' });
+  const [searchTerm, setSearchTerm] = useState('');
+  const [newMember, setNewMember] = useState({ 
+    name: '', 
+    relationship: 'Self', 
+    email: '', 
+    phone_number: '',
+    birth_date: '',
+    pan_number: '',
+    address: '',
+    occupation: ''
+  });
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
   const fetchData = async () => {

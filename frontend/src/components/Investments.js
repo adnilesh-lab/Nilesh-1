@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Plus, Search, Filter, Trash2, TrendingUp } from 'lucide-react';
-import { investmentsAPI, familyMembersAPI } from '@/lib/api';
+import { investmentsAPI, investorsAPI } from '@/lib/api';
 import { toast } from 'sonner';
 
 export const Investments = () => {

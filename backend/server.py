@@ -211,20 +211,26 @@ async def delete_custom_field(field_id: str):
 # Investment Endpoints
 @api_router.post("/investments", response_model=Investment)
 async def create_investment(investment_data: InvestmentCreate):
-    # Verify family member exists
-    member = await get_family_member_by_id(investment_data.family_member_id)
-    if not member:
-        raise HTTPException(status_code=404, detail="Family member not found")
+    # Verify investor exists
+    investor = await get_investor_by_id(investment_data.investor_id)
+    if not investor:
+        raise HTTPException(status_code=404, detail="Investor not found")
     
     investment = Investment(**investment_data.dict())
     await db.investments.insert_one(investment.dict())
     return investment
 
 @api_router.get("/investments", response_model=List[Investment])
-async def get_investments(family_member_id: Optional[str] = None):
+async def get_investments(
+    investor_id: Optional[str] = None,
+    investment_type: Optional[str] = None,
+    view_type: Optional[str] = "list"  # list, card, table
+):
     filter_query = {}
-    if family_member_id:
-        filter_query["family_member_id"] = family_member_id
+    if investor_id:
+        filter_query["investor_id"] = investor_id
+    if investment_type:
+        filter_query["investment_type"] = investment_type
     
     investments_cursor = db.investments.find(filter_query)
     investments = await investments_cursor.to_list(1000)
@@ -244,10 +250,10 @@ async def update_investment(investment_id: str, investment_data: InvestmentCreat
     if not existing_investment:
         raise HTTPException(status_code=404, detail="Investment not found")
     
-    # Verify family member exists
-    member = await get_family_member_by_id(investment_data.family_member_id)
-    if not member:
-        raise HTTPException(status_code=404, detail="Family member not found")
+    # Verify investor exists
+    investor = await get_investor_by_id(investment_data.investor_id)
+    if not investor:
+        raise HTTPException(status_code=404, detail="Investor not found")
     
     updated_data = investment_data.dict()
     updated_data["updated_at"] = datetime.utcnow()
@@ -271,6 +277,18 @@ async def delete_investment(investment_id: str):
         raise HTTPException(status_code=500, detail="Failed to delete investment")
     
     return {"success": True, "message": "Investment deleted successfully"}
+
+# Excel Import Endpoint
+@api_router.post("/investments/import-excel")
+async def import_investments_from_excel(file_data: dict):
+    # This would handle Excel file processing
+    # For now, return a placeholder response
+    return ExcelImportResponse(
+        success=True,
+        imported_count=0,
+        failed_count=0,
+        errors=[]
+    )
 
 # Dashboard Stats Endpoint
 @api_router.get("/dashboard/stats", response_model=DashboardStats)

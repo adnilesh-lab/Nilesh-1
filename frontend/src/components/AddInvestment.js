@@ -26,7 +26,9 @@ export const AddInvestment = () => {
     interest_rate: '',
     maturity_date: '',
     description: '',
-    issuer: ''
+    issuer: '',
+    photo_url: '',
+    custom_fields: {}
   });
 
   const investmentTypes = [

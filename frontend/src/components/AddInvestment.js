@@ -17,7 +17,7 @@ export const AddInvestment = () => {
   const [submitting, setSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
-    family_member_id: '',
+    investor_id: '',
     investment_name: '',
     investment_type: '',
     amount: '',

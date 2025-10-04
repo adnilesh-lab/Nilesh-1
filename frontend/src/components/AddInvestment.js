@@ -51,6 +51,7 @@ export const AddInvestment = () => {
 
   useEffect(() => {
     fetchFamilyMembers();
+    fetchCustomFields();
   }, []);
 
   const fetchFamilyMembers = async () => {
@@ -63,6 +64,16 @@ export const AddInvestment = () => {
       toast.error('Failed to load family members');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchCustomFields = async () => {
+    try {
+      const data = await customFieldsAPI.getByEntityType('investment');
+      setCustomFields(data);
+    } catch (error) {
+      console.error('Error fetching custom fields:', error);
+      // Don't show error as custom fields are optional
     }
   };
 

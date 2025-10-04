@@ -6,6 +6,7 @@ from typing import List, Optional
 from datetime import datetime, date
 import uuid
 import os
+import logging
 from dotenv import load_dotenv
 
 # Load environment variables
